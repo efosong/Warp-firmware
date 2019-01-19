@@ -11,6 +11,31 @@
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
 
+// Define some layout constants
+	// Rows
+	const uint8_t eco2_row = 5;
+	const uint8_t tvoc_row = 26;
+	const uint8_t dust_row = 47;
+	// Digit columns
+	const uint8_t d1 = 44;
+	const uint8_t d2 = 51;
+	const uint8_t d3 = 58;
+	const uint8_t d4 = 65;
+
+// Define colours
+typedef struct _colorgb
+{
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+} colorgb;
+colorgb white = {0xFF, 0xFF, 0xFF};
+colorgb qual_verygood = {0x00, 0xFF, 0x00};
+colorgb qual_good     = {0x0F, 0xFF, 0x00};
+colorgb qual_ok       = {0xFF, 0xFF, 0x00};
+colorgb qual_bad      = {0xFF, 0x0F, 0x00};
+colorgb qual_verybad  = {0xFF, 0x00, 0x00};
+
 
 /*
  *	Override Warp firmware's use of these pins and define new aliases.
@@ -60,6 +85,373 @@ writeCommand(uint8_t commandByte)
 }
 
 
+int drawRectangle(uint8_t p1x, uint8_t p1y, uint8_t p2x, uint8_t p2y, colorgb *color)
+{
+	writeCommand(kSSD1331CommandDRAWRECT);
+	// Send Point 1
+	writeCommand(p1x); writeCommand(p1y);
+	// Send Point 2
+	writeCommand(p2x); writeCommand(p2y);
+	// Send Line Color
+	writeCommand(color->r);
+	writeCommand(color->g);
+	writeCommand(color->b);
+	// Send Fill Color
+	writeCommand(color->r);
+	writeCommand(color->g);
+	writeCommand(color->b);
+	return 0;
+}
+
+int clearRectangle(uint8_t p1x, uint8_t p1y, uint8_t p2x, uint8_t p2y)
+{
+	writeCommand(kSSD1331CommandCLEAR);
+	// Send Point 1
+	writeCommand(p1x); writeCommand(p1y);
+	// Send Point 2
+	writeCommand(p2x); writeCommand(p2y);
+	return 0;
+}
+
+int drawBackground()
+{
+	colorgb white = {0xFF,0xFF,0xFF};
+	uint8_t x, y; // co-ordinates at which to draw characters 
+	// eCO2 (ppm)
+		// e
+		x = 8; y = eco2_row;
+		 drawRectangle(x+0,y+3,	x+5,y+9,	&white);
+		clearRectangle(x+2,y+4,	x+3,y+5);
+		clearRectangle(x+2,y+7,	x+5,y+7);
+		// C
+		x = 15; y = eco2_row;
+		 drawRectangle(x+0,y+1,	x+5,y+8,	&white);
+		 drawRectangle(x+1,y+0,	x+4,y+9,	&white); 
+		clearRectangle(x+2,y+2,	x+3,y+7);
+		clearRectangle(x+4,y+4,	x+5,y+5);
+		// O
+		x = 22; y = eco2_row;
+		 drawRectangle(x+0,y+1,	x+5,y+8,	&white);
+		 drawRectangle(x+1,y+0,	x+4,y+9,	&white); 
+		clearRectangle(x+2,y+2,	x+3,y+7);
+		// _2
+		x = 29; y = eco2_row;
+		 drawRectangle(x+0,y+5,	x+2,y+9,	&white);
+		clearRectangle(x+0,y+6,	x+1,y+6);
+		clearRectangle(x+1,y+8,	x+2,y+8);
+		// p
+		x = 74; y = eco2_row+5;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+3,	x+2,y+4);
+		clearRectangle(x+1,y+1,	x+1,y+1);
+		// p
+		x = 78; y = eco2_row+5;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+3,	x+2,y+4);
+		clearRectangle(x+1,y+1,	x+1,y+1);
+		// m
+		x = 82; y = eco2_row+5;
+		 drawRectangle(x+0,y+0,	x+4,y+4,	&white);
+		clearRectangle(x+1,y+1,	x+1,y+4);
+		clearRectangle(x+3,y+1,	x+3,y+4);
+	// tVOC (ppb)
+		// t
+		x =  1; y = tvoc_row;
+		 drawRectangle(x+2,y+0,	x+3,y+9,	&white);
+		 drawRectangle(x+2,y+2,	x+5,y+3,	&white);
+		 drawRectangle(x+2,y+8,	x+5,y+9,	&white);
+		// V
+		x =  8; y = tvoc_row;
+		 drawRectangle(x+0,y+0,	x+1,y+7,	&white);
+		 drawRectangle(x+2,y+6,	x+3,y+9,	&white);
+		 drawRectangle(x+4,y+0,	x+5,y+7,	&white);
+		// O
+		x = 15; y = tvoc_row;
+		 drawRectangle(x+0,y+1,	x+5,y+8,	&white);
+		 drawRectangle(x+1,y+0,	x+4,y+9,	&white); 
+		clearRectangle(x+2,y+2,	x+3,y+7);
+		// C
+		x = 22; y = tvoc_row;
+		 drawRectangle(x+0,y+1,	x+5,y+8,	&white);
+		 drawRectangle(x+1,y+0,	x+4,y+9,	&white); 
+		clearRectangle(x+2,y+2,	x+3,y+7);
+		clearRectangle(x+4,y+4,	x+5,y+5);
+		// p
+		x = 74; y = 31;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+3,	x+2,y+4);
+		clearRectangle(x+1,y+1,	x+1,y+1);
+		// p
+		x = 78; y = 31;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+3,	x+2,y+4);
+		clearRectangle(x+1,y+1,	x+1,y+1);
+		// b
+		x = 82; y = 31;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+0,	x+2,y+1);
+		clearRectangle(x+1,y+3,	x+1,y+3);
+	// Dust (ng/m3)
+		// D
+		x = 1; y = dust_row;
+		 drawRectangle(x+0,y+0,	x+3,y+9,	&white);
+		 drawRectangle(x+4,y+1,	x+4,y+8,	&white);
+		 drawRectangle(x+5,y+2,	x+5,y+7,	&white);
+		clearRectangle(x+2,y+2,	x+3,y+7);
+		// U
+		x =  8; y = dust_row;
+		 drawRectangle(x+0,y+0,	x+1,y+8,	&white);
+		 drawRectangle(x+1,y+8,	x+4,y+9,	&white);
+		 drawRectangle(x+4,y+0,	x+5,y+8,	&white);
+		// S
+		x = 15; y = dust_row;
+		 drawRectangle(x+1,y+0,	x+5,y+1,	&white);
+		 drawRectangle(x+0,y+1,	x+1,y+4,	&white);
+		 drawRectangle(x+1,y+4,	x+4,y+5,	&white);
+		 drawRectangle(x+4,y+5,	x+5,y+8,	&white);
+		 drawRectangle(x+0,y+8,	x+4,y+9,	&white);
+		// T
+		x = 22; y = dust_row;
+		 drawRectangle(x+0,y+0,	x+5,y+1,	&white);
+		 drawRectangle(x+2,y+2,	x+3,y+9,	&white);
+		// n
+		x = 74; y = dust_row+6;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+1,y+1,	x+1,y+4);
+		// g
+		x = 78; y = dust_row+6;
+		 drawRectangle(x+0,y+0,	x+2,y+5,	&white);
+		clearRectangle(x+1,y+1,	x+1,y+2);
+		clearRectangle(x+0,y+4,	x+1,y+4);
+		// /
+		x = 82; y = dust_row+6;
+		 drawRectangle(x+0,y+3,	x+0,y+4,	&white);
+		 drawRectangle(x+1,y+2,	x+1,y+2,	&white);
+		 drawRectangle(x+2,y+0,	x+2,y+1,	&white);
+		// m
+		x = 86; y = dust_row+6;
+		 drawRectangle(x+0,y+0,	x+4,y+4,	&white);
+		clearRectangle(x+1,y+1,	x+1,y+4);
+		clearRectangle(x+3,y+1,	x+3,y+4);
+		// 3
+		x = 92; y = dust_row+4;
+		 drawRectangle(x+0,y+0,	x+2,y+4,	&white);
+		clearRectangle(x+0,y+1,	x+1,y+1);
+		clearRectangle(x+0,y+3,	x+1,y+3);
+	return 0;
+}
+
+
+
+int drawDigit(uint8_t digit, uint8_t x, uint8_t y, colorgb *color)
+{
+	// First, clear the area
+	clearRectangle(x+0,y+0,	x+5,y+9);
+	// Draw the digit
+	switch (digit){
+		case 0:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+2,	x+3,y+7);
+			break;
+		case 1:
+			drawRectangle(x+2,y+0,	x+3,y+9, color);
+			break;
+		case 2:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+0,y+2,	x+3,y+3);
+			clearRectangle(x+2,y+6,	x+5,y+7);
+			break;
+		case 3:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+0,y+2,	x+3,y+3);
+			clearRectangle(x+0,y+6,	x+3,y+7);
+			break;
+		case 4:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+0,	x+3,y+3);
+			clearRectangle(x+0,y+6,	x+3,y+9);
+			break;
+		case 5:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+2,	x+5,y+3);
+			clearRectangle(x+0,y+6,	x+3,y+7);
+			break;
+		case 6:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+2,	x+5,y+3);
+			clearRectangle(x+2,y+6,	x+3,y+7);
+			break;
+		case 7:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+0,y+2,	x+3,y+9);
+			break;
+		case 8:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+2,	x+3,y+3);
+			clearRectangle(x+2,y+6,	x+3,y+7);
+			break;
+		case 9:
+			 drawRectangle(x+0,y+0,	x+5,y+9, color);
+			clearRectangle(x+2,y+2,	x+3,y+3);
+			clearRectangle(x+0,y+6,	x+3,y+7);
+			break;
+		case 10: // draw a dash (-)
+			 drawRectangle(x+0,y+4,	x+5,y+5, color);
+			break;
+		default: // just clear the space
+			break;
+	}
+	return 0;
+}
+
+int drawCO2(int eco2)
+{
+	// choose display colour
+	colorgb *color;
+	if (eco2 < 700)
+		color = &qual_verygood;
+	else if (eco2 < 1200)
+		color = &qual_good;
+	else if (eco2 < 2000)
+		color = &qual_ok;
+	else if (eco2 < 4500)
+		color = &qual_bad;
+	else
+		color = &qual_verybad;
+
+	// Write readings
+	if (eco2 < 400 || eco2 > 8192)
+	{// Invalid reading so print ---- (or we wanted to print ----)
+		drawDigit(10,             d1, eco2_row, &white);
+		drawDigit(10,             d2, eco2_row, &white);
+		drawDigit(10,             d3, eco2_row, &white);
+		drawDigit(10,             d4, eco2_row, &white);
+	}
+	else if (eco2 >= 1000)
+	{
+		drawDigit((eco2/1000)%10, d1, eco2_row, color);
+		drawDigit((eco2/100 )%10, d2, eco2_row, color);
+		drawDigit((eco2/10  )%10, d3, eco2_row, color);
+		drawDigit((eco2     )%10, d4, eco2_row, color);
+	}
+	else
+	{
+		drawDigit(11,             d1, eco2_row, color); // clear first digit 
+		drawDigit((eco2/100 )%10, d2, eco2_row, color);
+		drawDigit((eco2/10  )%10, d3, eco2_row, color);
+		drawDigit((eco2     )%10, d4, eco2_row, color);
+	}
+	return 0;
+}
+
+int drawVOC(int tvoc)
+{
+	// choose display colour
+	colorgb *color;
+	if (tvoc < 8)
+		color = &qual_verygood;
+	else if (tvoc < 16)
+		color = &qual_good;
+	else if (tvoc < 30)
+		color = &qual_ok;
+	else if (tvoc < 50)
+		color = &qual_bad;
+	else
+		color = &qual_verybad;
+
+	// Write readings
+	if (tvoc > 1187)
+	{ // Invalid reading so print ---- (or we wanted to print ----)
+		drawDigit(10,             d1, tvoc_row, &white);
+		drawDigit(10,             d2, tvoc_row, &white);
+		drawDigit(10,             d3, tvoc_row, &white);
+		drawDigit(10,             d4, tvoc_row, &white);
+	}
+	else if (tvoc >= 1000)
+	{
+		drawDigit((tvoc/1000)%10, d1, tvoc_row, color);
+		drawDigit((tvoc/100 )%10, d2, tvoc_row, color);
+		drawDigit((tvoc/10  )%10, d3, tvoc_row, color);
+		drawDigit((tvoc     )%10, d4, tvoc_row, color);
+	}
+	else if (tvoc >= 100)
+	{
+		drawDigit(11,             d1, tvoc_row, color); // clear first digit 
+		drawDigit((tvoc/100 )%10, d2, tvoc_row, color);
+		drawDigit((tvoc/10  )%10, d3, tvoc_row, color);
+		drawDigit((tvoc     )%10, d4, tvoc_row, color);
+	}
+	else if (tvoc >= 10)
+	{
+		drawDigit(11,             d1, tvoc_row, color); // clear first digit 
+		drawDigit(11,             d2, tvoc_row, color); // clear second digit 
+		drawDigit((tvoc/10  )%10, d3, tvoc_row, color);
+		drawDigit((tvoc     )%10, d4, tvoc_row, color);
+	}
+	else
+	{
+		drawDigit(11,             d1, tvoc_row, color); // clear first digit 
+		drawDigit(11,             d2, tvoc_row, color); // clear second digit 
+		drawDigit(11,             d3, tvoc_row, color); // clear third digit 
+		drawDigit((tvoc     )%10, d4, tvoc_row, color);
+	}
+	return 0;
+}
+
+int drawDust(int dust)
+{
+	// choose display colour
+	// TODO choose suitable values
+	colorgb *color;
+	if (dust< 100)
+		color = &qual_verygood;
+	else if (dust < 200)
+		color = &qual_good;
+	else if (dust < 300)
+		color = &qual_ok;
+	else if (dust < 400)
+		color = &qual_bad;
+	else
+		color = &qual_verybad;
+
+	// Write readings
+	if (dust > 9000)
+	{ // Invalid reading so print ---- (or we wanted to print ----)
+		drawDigit(10,             d1, dust_row, &white);
+		drawDigit(10,             d2, dust_row, &white);
+		drawDigit(10,             d3, dust_row, &white);
+		drawDigit(10,             d4, dust_row, &white);
+	}
+	else if (dust >= 1000)
+	{
+		drawDigit((dust/1000)%10, d1, dust_row, color);
+		drawDigit((dust/100 )%10, d2, dust_row, color);
+		drawDigit((dust/10  )%10, d3, dust_row, color);
+		drawDigit((dust     )%10, d4, dust_row, color);
+	}
+	else if (dust >= 100)
+	{
+		drawDigit(11,             d1, dust_row, color); // clear first digit
+		drawDigit((dust/100 )%10, d2, dust_row, color);
+		drawDigit((dust/10  )%10, d3, dust_row, color);
+		drawDigit((dust     )%10, d4, dust_row, color);
+	}
+	else if (dust >= 10)
+	{
+		drawDigit(11,             d1, dust_row, color); // clear digit 
+		drawDigit(11,             d2, dust_row, color); // clear second digit 
+		drawDigit((dust/10  )%10, d3, dust_row, color);
+		drawDigit((dust     )%10, d4, dust_row, color);
+	}
+	else
+	{
+		drawDigit(11,             d1, dust_row, color); // clear first digit
+		drawDigit(11,             d2, dust_row, color); // clear second digit 
+		drawDigit(11,             d3, dust_row, color); // clear third digit
+		drawDigit((dust     )%10, d4, dust_row, color);
+	}
+	return 0;
+}
 
 int
 devSSD1331init(void)
@@ -156,8 +548,11 @@ devSSD1331init(void)
 	 *	Any post-initialization drawing commands go here.
 	 */
 	//...
-
-
+	drawBackground();
+	// Initialise readings with all '-----'s
+	drawCO2(100);
+	drawVOC(10000);
+	drawDust(10000);
 
 	return 0;
 }

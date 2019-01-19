@@ -43,3 +43,6 @@ typedef enum
 } SSD1331Commands;
 
 int	devSSD1331init(void);
+int drawCO2(int);
+int drawVOC(int);
+int drawDust(int);

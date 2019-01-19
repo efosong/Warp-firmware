@@ -168,7 +168,7 @@ typedef struct
 	/*
 	 *	TODO: for now, magic numbers for buffer sizes
 	 */
-	uint8_t			i2cBuffer[2];
+	uint8_t			i2cBuffer[4];
 
 	WarpStatus		deviceStatus;
 } WarpI2CDeviceState;
@@ -227,6 +227,7 @@ typedef enum
 	kWarpSensorAMG8834T01L		= 0x80,
 	kWarpSensorAMG8834T64H		= 0xFF,
 	kWarpSensorCCS811RAW_DATA	= 0x03,
+	kWarpSensorCCS811ALG_RESULT_DATA= 0x03,
 	kWarpSensorBMX055accelACCD_X_LSB= 0x02,
 	kWarpSensorBMX055accelACCD_X_MSB= 0x03,
 	kWarpSensorBMX055accelACCD_Y_LSB= 0x04,

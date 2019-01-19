@@ -234,7 +234,7 @@ readSensorRegisterCCS811(uint8_t deviceRegister)
 							cmdBuf,
 							1,
 							(uint8_t *)deviceCCS811State.i2cBuffer,
-							2,
+							4,
 							500 /* timeout in milliseconds */);
 
 	//SEGGER_RTT_printf(0, "\r\nI2C_DRV_MasterReceiveData returned [%d]\n", returnValue);

@@ -61,9 +61,8 @@ enum _gpio_pins
 	kWarpPinTPS82740_VSEL3			= GPIO_MAKE_PIN(HW_GPIOB, 5),		/*	Warp TPS82740_VSEL3	--> PTB5									*/
 	kWarpPinTS5A3154_IN			= GPIO_MAKE_PIN(HW_GPIOB, 6),		/*	Warp TS5A3154_IN	--> PTB6		(was unused in Warp v2)					*/
 	kWarpPinSI4705_nRST			= GPIO_MAKE_PIN(HW_GPIOB, 7),		/*	Warp SI4705_nRST	--> PTB7		(was unused in Warp v2)					*/
-
+	kWarpPinPWM					= GPIO_MAKE_PIN(HW_GPIOB, 10),
 #ifdef WARP_BUILD_ENABLE_THERMALCHAMBERANALYSIS
-	kWarpPinFRDMKL03LED_Red			= GPIO_MAKE_PIN(HW_GPIOB, 10),		/*	PTB10: LED_Red												*/
 	kWarpPinFRDMKL03LED_Green		= GPIO_MAKE_PIN(HW_GPIOB, 11),		/*	PTB11: LED_Green											*/
 	kWarpPinFRDMKL03LED_Blue		= GPIO_MAKE_PIN(HW_GPIOB, 13),		/*	PTB13: LED_Blue												*/
 #else
